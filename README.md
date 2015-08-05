@@ -68,6 +68,7 @@ Assuming the code below is inserted into the previous example shown, the result 
 ```javascript
 contract MyContract is ParentContract {
 
+    // Just a simple comment
     uint public attr1 = 123;
 }
 ```
