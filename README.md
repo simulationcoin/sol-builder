@@ -1,6 +1,6 @@
 ﻿# Solidity Contract Builder
 
-Simple module for building solidity contracts for the Ethereum platform using javascript. 
+Module for building solidity contracts for the Ethereum platform using javascript. 
 
 This is particularly useful when you have to build a contract using parameters specified by your end user. Using sol-builder you can add/remove attributes, change types, change function signatures, etc, without having to manipulate directly the string representing the contract.
 
@@ -21,13 +21,12 @@ npm test
 
 # Creating a contract
 
-To create a simple contract, all you have to do is set its name. Optionally, you can specify a parent contract like the example below. 
+To create a simple contract, you have to use the function `addContract`. This function will create a contract with the specified name and parent (if specified). For instance:
 
 ```javascript
 var builder = require('sol-builder');
 
-builder.setName('MyContract');
-builder.is('ParentContract');
+builder.addContract({name: 'Test', is: 'Parent'});
 
 console.log(builder.getContract());
 ```
@@ -35,10 +34,34 @@ console.log(builder.getContract());
 This code will print:
 
 ```javascript
-contract MyContract is ParentContract {
+contract Test is Parent {
 
 }
 ```
+
+You can add as many contract as you want. For instance, the code;
+
+```javascript
+var builder = require('sol-builder');
+
+builder.addContract({name: 'Test', is: 'Parent'});
+builder.addContract({name: 'Other', is: 'Test'});
+
+console.log(builder.getContract());
+
+```
+
+Will produce:
+
+```javascript
+contract Test is Parent {
+
+}
+
+contract Other is Test {
+}
+```
+
 
 # Adding attributes
 
@@ -59,7 +82,7 @@ builder.addAttribute({
     type: 'uint',
     modifier: 'public',
     comment: 'Just a simple comment',
-    value: '123'
+    value: 123
 });
 ```
 
@@ -80,7 +103,7 @@ You can change any property of an attribute by using the function `changeAttribu
 ```javascript
 builder.changeAttribute({
     name: 'attr1',
-    value: '999'
+    value: 999
 });
 ```
 
@@ -98,7 +121,7 @@ Another example, changing more than one property:
 ```javascript
 builder.changeAttribute({
     name: 'attr1',
-    value: '999',
+    value: 999,
     comment: 'Just a test comment',
     modifier: undefined
 });
@@ -143,7 +166,7 @@ builder.addStruct({
         {
             name: 'attr2',
             type: 'uint',
-            value: '123'
+            value: 123
         }
     ];
 });
@@ -302,14 +325,13 @@ contract MyContract is ParentContract {
 ```javascript
 var builder = require('sol-builder');
 
-builder.setName('MyContract');
-builder.is('ParentContract');
+builder.addContract({name: 'MyContract', is: 'ParentContract'});
 
 builder.addAttribute({
     name:     'someNumber',
     type:     'uint8',
     modifier: 'public',                   /* optional */
-    value:    '16',                       /* optional */
+    value:    16,                         /* optional */
     comment:  'Just a test attribute...', /* optional */
     lineBreak: true                       /* optional */
 });
@@ -355,6 +377,8 @@ builder.addFunction({
 
 });
 
+builder.addContract({name: 'OtherContract', is: 'MyContract'});
+
 console.log(builder.getContract());
 ```
 
@@ -381,6 +405,10 @@ contract MyContract is ParentContract {
         someNumber++;
         someNumber += _number;
     }
+}
+
+contract OtherContract is MyContract {
+
 }
 
 ```

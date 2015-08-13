@@ -1,7 +1,6 @@
 var builder = require('./sol-builder.js');
 
-builder.setName('MyContract');
-builder.is('ParentContract');
+builder.addContract({name: 'Test', is: 'Parent'});
 
 builder.addAttribute({
     name:     'someNumber',
@@ -20,7 +19,7 @@ builder.addStruct({
         {
             name: 'myNumber',
             type: 'uint32',
-            comment: 'Simple comment aldkfajsfl kjf kdjsf lkjsf lkjf akdjsf akjlf adksjlf akdsjfl askdflja kdsfjakjfkdjfkdjfdj kls', /* optional */
+            comment: 'Simple comment aldkfajsfl kjf kdjsf lkjsf lkja dflkja lfkaj lfakjfd salkj lklkjf akdjsf akjlf adksjlf akdsjfl askdflja kdsfjakjfkdjfkdjfdj kls', /* optional */
             lineBreak: false           /* optional */
         },
         {
@@ -52,5 +51,7 @@ builder.addFunction({
     body: 'someNumber++;someNumber += _number;'
 
 });
+
+builder.addContract({name: 'Other', is: 'Test'});
 
 console.log(builder.getContract());

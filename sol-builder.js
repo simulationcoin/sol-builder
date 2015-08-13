@@ -6,7 +6,8 @@ var SolBuilder = (function() {
         ATTRIBUTE: 'attribute',
         STRUCT:    'struct'   ,
         MAPPING:   'mapping'  ,
-        FUNCTION:  'function'
+        FUNCTION:  'function' ,
+        CONTRACT:  'contract'
     }
 
     var properties = {};
@@ -16,11 +17,16 @@ var SolBuilder = (function() {
     properties[types.MAPPING]   = ['keyType', 'valueType', 'modifier'].concat(common);
     properties[types.FUNCTION]  = ['parameters', 'returnType'].concat(common);
 
-    var inherits = '';
     var name = 'Undefined';
     var replacements = {};
 
     var items = [];
+
+    function _reset() {
+        name = 'undefined';
+        replacements = {};
+        items = [];
+    }
 
     function _build(item) {
 
@@ -44,7 +50,21 @@ var SolBuilder = (function() {
     function _buildComment(item) {
         var result = '';
         if (item.comment && item.comment.length > 0) {
-            result += '// ' + item.comment + '\n';
+            var words = item.comment.split(" ");
+            var toAppend = '';
+            var counter = 0;
+            // number of words per line = 7
+            for (var i = 0; i < words.length; i++) {
+                toAppend += words[i] + ' ';
+                counter++;
+                if (counter == 7) {
+                    counter = 0;
+                    toAppend += '\n// ';
+                }
+            }
+            toAppend = toAppend.substring(0, toAppend.length - 1);
+
+            result += '// ' + toAppend + '\n';
         }
         return result;
     }
@@ -60,8 +80,12 @@ var SolBuilder = (function() {
             result += item.modifier + ' ';
         }
         result += item.name;
-        if (item.value && item.value.length > 0) {
-            result += ' = ' + item.value;
+        if (typeof item.value != 'undefined') {
+            if (typeof item.value == 'string') {
+                result += ' = "' + item.value + '"';
+            } else {
+                result += ' = ' + item.value;
+            }
         }
         result += ';';
         return _lineBreak(item, result);
@@ -141,16 +165,12 @@ var SolBuilder = (function() {
         
     return {
 
-        setName: function(_name) {
-            name = _name;
-        },
-
-        getName: function() {
-            return name;
-        },
-
-        is: function(_parent) {
-            inherits = _parent;
+        addContract: function(data) {
+            items.push({
+                itemType: types.CONTRACT,
+                name: data.name,
+                is: data.is
+            });
         },
 
         addAttribute: function(attribute) {
@@ -219,7 +239,8 @@ var SolBuilder = (function() {
                 returnType: func.returnType,
                 body: func.body,
                 comment: func.comment,
-                lineBreak: func.lineBreak
+                lineBreak: func.lineBreak,
+                modifier: func.modifier
             });
         },
 
@@ -235,14 +256,27 @@ var SolBuilder = (function() {
             replacements[replacement.from] = replacement.to;
         },
 
+        reset: _reset,
+
         getContract: function() {
-            var result = 'contract ' + name;
-            if (inherits.length > 0) {
-                result += ' is ' + inherits;
+            var result = '';
+            // First item HAS to be a contract
+            if (items[0].itemType != types.CONTRACT) {
+                throw 'First item HAS to be a contract!';
             }
-            result += ' {\n\n';
             for (var i = 0; i < items.length; i++) {
-                result += _build(items[i]);
+                if (items[i].itemType == types.CONTRACT) {
+                    if (result.length > 0) {
+                        result += '}\n\n';
+                    }
+                    result += 'contract ' + items[i].name;
+                    if (items[i].is) {
+                        result += ' is ' + items[i].is;
+                    }
+                    result += ' {\n\n';
+                } else {
+                    result += _build(items[i]);
+                }
             }
             result += '}';
             for (var rep in replacements) {

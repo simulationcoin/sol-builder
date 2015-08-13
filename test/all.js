@@ -2,12 +2,12 @@ var builder = require('../sol-builder.js')
 
 exports['tests'] = function(assert) {
 
-    builder.setName('MyContract')
+    builder.addContract({name: 'MyContract'})
     assert.equal(builder.getContract(), 
         'contract MyContract {\n\n}', 'Test setName')
 
-    
-    builder.is('ParentContract')
+    builder.reset();
+    builder.addContract({name: 'MyContract', is:'ParentContract'})
     assert.equal(builder.getContract(), 
         'contract MyContract is ParentContract {\n\n}', 'Test is')
 
@@ -38,7 +38,7 @@ exports['tests'] = function(assert) {
     builder.addAttribute({
         name: 'attr1',
         type: 'address',
-        value: '"0x0"'
+        value: '0x0'
     })
     assert.equal(builder.getContract(), 
         'contract MyContract is ParentContract {\n\n    address attr1 = "0x0";\n}', 'Test addAttribute (value)')
@@ -69,7 +69,7 @@ exports['tests'] = function(assert) {
         name: 'attr1',
         type: 'address',
         modifier: 'public',
-        value: '"0x0"',
+        value: '0x0',
         lineBreak: true,
         comment: 'Test comment'
     })
@@ -81,12 +81,12 @@ exports['tests'] = function(assert) {
     builder.addAttribute({
         name: 'attr1',
         type: 'address',
-        value: '"0x0"'
+        value: '0x0'
     })
     builder.changeAttribute({
         name: 'attr1',
         type: 'bytes32',
-        value: '"0x1"'
+        value: '0x1'
     });
     assert.equal(builder.getContract(), 
         'contract MyContract is ParentContract {\n\n    bytes32 attr1 = "0x1";\n}', 'Test changeAttribute')
